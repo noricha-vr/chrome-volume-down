@@ -29,7 +29,7 @@ DEFAULT_VOLUME = float(os.getenv("DEFAULT_VOLUME", "0.5"))
 # ========================
 
 
-def parse_args():
+def parse_args(args=None):
     parser = argparse.ArgumentParser(
         description="Chromecast / Google TV の音量を定期的に下げるスクリプト"
     )
@@ -63,7 +63,7 @@ def parse_args():
         default=DEFAULT_VOLUME,
         help=f"リセット時のデフォルト音量。デフォルト: {DEFAULT_VOLUME}"
     )
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def main() -> None:

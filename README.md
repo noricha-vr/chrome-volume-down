@@ -1,6 +1,6 @@
-# Chrome Volume Down 🔊
+# ねむキャス (Nemucast) 🔊😴
 
-Chromecast / Google TV の音量を定期的に自動で下げるPythonスクリプトです。深夜のテレビ視聴などで、時間とともに音量を徐々に下げ、最終的に自動で電源を切りたい場合に便利です。
+Chromecast / Google TV の音量を定期的に自動で下げるPythonツールです。「ねむキャス」は、寝落ちするときに音量を徐々に下げて、最終的に自動でスタンバイモードに移行させるためのツールです。
 
 ![alt text](images/assets_task_01jy97dj7yey59zsq6vq5zd7dx_1750509022_img_1.webp)
 
@@ -36,16 +36,15 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ### 2. リポジトリのクローン
 
 ```bash
-git clone https://github.com/noricha-vr/chrome-volume-down.git
-cd chrome-volume-down
+git clone https://github.com/noricha-vr/nemucast.git
+cd nemucast
 ```
 
 ### 3. 依存関係のインストール
 
 ```bash
-# uvを使用して仮想環境を作成し、依存関係をインストール
-uv venv
-uv pip install -e .
+# uvを使用して依存関係をインストール
+uv sync
 ```
 
 ## ⚙️ 設定
@@ -85,14 +84,14 @@ uv run python main.py
 ### 基本的な実行
 
 ```bash
-# uvを使用して実行
-uv run python main.py
+# デフォルト設定で実行
+nemucast
 
 # インターバルを指定して実行（10分間隔）
-uv run python main.py --interval 600
+nemucast --interval 600
 
 # ショートオプションを使用
-uv run python main.py -i 300  # 5分間隔
+nemucast -i 300  # 5分間隔
 ```
 
 ### バックグラウンドで実行（Linux/macOS）
