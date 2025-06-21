@@ -1,6 +1,8 @@
 # Chrome Volume Down 🔊
 
-Chromecast / Google TV の音量を定期的に自動で下げるPythonスクリプトです。深夜のテレビ視聴などで、時間とともに音量を徐々に下げたい場合に便利です。
+Chromecast / Google TV の音量を定期的に自動で下げるPythonスクリプトです。深夜のテレビ視聴などで、時間とともに音量を徐々に下げ、最終的に自動で電源を切りたい場合に便利です。
+
+![alt text](images/assets_task_01jy97dj7yey59zsq6vq5zd7dx_1750509022_img_1.webp)
 
 ## 🎯 機能
 
