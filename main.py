@@ -39,6 +39,30 @@ def parse_args():
         default=DEFAULT_INTERVAL_SEC,
         help=f"音量調整の間隔（秒）。デフォルト: {DEFAULT_INTERVAL_SEC}秒"
     )
+    parser.add_argument(
+        "-n", "--name",
+        type=str,
+        default=CHROMECAST_NAME,
+        help=f"Chromecastの名前。デフォルト: {CHROMECAST_NAME}"
+    )
+    parser.add_argument(
+        "-s", "--step",
+        type=float,
+        default=STEP,
+        help=f"音量調整のステップ（負の値）。デフォルト: {STEP}"
+    )
+    parser.add_argument(
+        "-m", "--min-level",
+        type=float,
+        default=MIN_LEVEL,
+        help=f"最小音量レベル。デフォルト: {MIN_LEVEL}"
+    )
+    parser.add_argument(
+        "-d", "--default-volume",
+        type=float,
+        default=DEFAULT_VOLUME,
+        help=f"リセット時のデフォルト音量。デフォルト: {DEFAULT_VOLUME}"
+    )
     return parser.parse_args()
 
 
@@ -46,6 +70,10 @@ def main() -> None:
     # コマンドライン引数を解析
     args = parse_args()
     interval_sec = args.interval
+    chromecast_name = args.name
+    step = args.step
+    min_level = args.min_level
+    default_volume = args.default_volume
     
     # logs ディレクトリにファイルとしてログを出力する設定
     log_dir = Path(__file__).resolve().parent / "logs"
@@ -62,6 +90,10 @@ def main() -> None:
     )
     
     logging.info(f"音量調整間隔: {interval_sec}秒")
+    logging.info(f"Chromecast名: {chromecast_name}")
+    logging.info(f"音量調整ステップ: {step}")
+    logging.info(f"最小音量レベル: {min_level}")
+    logging.info(f"デフォルト音量: {default_volume}")
 
     logging.info("Chromecast デバイスを検索しています...")
     
@@ -79,12 +111,12 @@ def main() -> None:
     cast = None
     for cc in chromecasts:
         logging.info(f'キャスト名: {cc.cast_info.friendly_name}')
-        if cc.cast_info.friendly_name == CHROMECAST_NAME:
+        if cc.cast_info.friendly_name == chromecast_name:
             cast = cc
             break
 
     if cast is None:
-        logging.error("目的の Chromecast '%s' が見つかりませんでした。", CHROMECAST_NAME)
+        logging.error("目的の Chromecast '%s' が見つかりませんでした。", chromecast_name)
         pychromecast.stop_discovery(browser)
         sys.exit(1)
 
@@ -103,11 +135,11 @@ def main() -> None:
                 
             logging.info("現在の音量: %.2f", cur)
             
-            if cur <= MIN_LEVEL:
+            if cur <= min_level:
                 logging.info("最小音量に到達 (%.2f)。", cur)
                 # ボリュームを0に設定
-                cast.set_volume(DEFAULT_VOLUME)
-                logging.info("音量を%sに設定しました。", DEFAULT_VOLUME)
+                cast.set_volume(default_volume)
+                logging.info("音量を%sに設定しました。", default_volume)
                 time.sleep(2)  # 音量設定が反映されるまで待機
                 
                 # Chromecastの電源を切る（スタンバイモードにする）
@@ -117,7 +149,7 @@ def main() -> None:
                 logging.info("Chromecastがスタンバイモードになりました。プログラムを終了します。")
                 break
 
-            new_level = max(MIN_LEVEL-1, round(cur + STEP, 2))
+            new_level = max(min_level-1, round(cur + step, 2))
             cast.set_volume(new_level)
             logging.info("音量を %.2f → %.2f へ変更しました", cur, new_level)
 
