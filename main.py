@@ -2,7 +2,7 @@
 """
 lower_cast_volume.py
 --------------------
-指定した Chromecast / Google TV の音量を 1 分ごとに 1 ステップ下げ続ける
+指定した Chromecast / Google TV の音量を 20 分ごとに 1 ステップ下げ続ける
 * pychromecast 10.4.0 以上推奨
 * Python 3.9+
 """
