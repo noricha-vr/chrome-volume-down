@@ -11,6 +11,7 @@ import os
 import time
 import logging
 import sys
+import argparse
 from pathlib import Path
 
 import pychromecast
@@ -23,12 +24,29 @@ load_dotenv()
 CHROMECAST_NAME = os.getenv("CHROMECAST_NAME", "Dell")
 STEP = float(os.getenv("STEP", "-0.04"))
 MIN_LEVEL = float(os.getenv("MIN_LEVEL", "0.3"))
-INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "1200"))
+DEFAULT_INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "1200"))
 DEFAULT_VOLUME = float(os.getenv("DEFAULT_VOLUME", "0.5"))
 # ========================
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Chromecast / Google TV の音量を定期的に下げるスクリプト"
+    )
+    parser.add_argument(
+        "-i", "--interval",
+        type=int,
+        default=DEFAULT_INTERVAL_SEC,
+        help=f"音量調整の間隔（秒）。デフォルト: {DEFAULT_INTERVAL_SEC}秒"
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    # コマンドライン引数を解析
+    args = parse_args()
+    interval_sec = args.interval
+    
     # logs ディレクトリにファイルとしてログを出力する設定
     log_dir = Path(__file__).resolve().parent / "logs"
     log_dir.mkdir(exist_ok=True)
@@ -42,6 +60,8 @@ def main() -> None:
             logging.StreamHandler(sys.stdout),
         ],
     )
+    
+    logging.info(f"音量調整間隔: {interval_sec}秒")
 
     logging.info("Chromecast デバイスを検索しています...")
     
@@ -101,7 +121,7 @@ def main() -> None:
             cast.set_volume(new_level)
             logging.info("音量を %.2f → %.2f へ変更しました", cur, new_level)
 
-            time.sleep(INTERVAL_SEC)
+            time.sleep(interval_sec)
     finally:
         # Discoveryを適切に停止
         pychromecast.stop_discovery(browser)

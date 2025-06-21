@@ -87,12 +87,21 @@ uv run python main.py
 ```bash
 # uvを使用して実行
 uv run python main.py
+
+# インターバルを指定して実行（10分間隔）
+uv run python main.py --interval 600
+
+# ショートオプションを使用
+uv run python main.py -i 300  # 5分間隔
 ```
 
 ### バックグラウンドで実行（Linux/macOS）
 
 ```bash
 nohup uv run python main.py &
+
+# インターバルを指定してバックグラウンド実行
+nohup uv run python main.py --interval 900 &  # 15分間隔
 ```
 
 ### システムサービスとして実行（systemd）
@@ -132,11 +141,11 @@ crontab -e
 # 毎晩22時に音量下げを開始
 0 22 * * * cd /path/to/chrome-volume-down && /usr/local/bin/uv run python main.py >> /path/to/chrome-volume-down/logs/cron.log 2>&1
 
-# 毎晩23時に音量下げを開始（金・土曜日のみ）
-0 23 * * 5,6 cd /path/to/chrome-volume-down && /usr/local/bin/uv run python main.py >> /path/to/chrome-volume-down/logs/cron.log 2>&1
+# 毎晩23時に音量下げを開始（金・土曜日のみ）、インターバルは10分
+0 23 * * 5,6 cd /path/to/chrome-volume-down && /usr/local/bin/uv run python main.py --interval 600 >> /path/to/chrome-volume-down/logs/cron.log 2>&1
 
-# 2時間ごとに実行（深夜帯のみ: 22時、0時、2時、4時）
-0 22,0,2,4 * * * cd /path/to/chrome-volume-down && /usr/local/bin/uv run python main.py >> /path/to/chrome-volume-down/logs/cron.log 2>&1
+# 2時間ごとに実行（深夜帯のみ: 22時、0時、2時、4時）、インターバルは5分
+0 22,0,2,4 * * * cd /path/to/chrome-volume-down && /usr/local/bin/uv run python main.py -i 300 >> /path/to/chrome-volume-down/logs/cron.log 2>&1
 ```
 
 #### 3. cron 設定のポイント
@@ -223,6 +232,27 @@ Chromecastを検索
 - 音量の変更履歴
 - エラーや警告メッセージ
 - スタンバイモードへの移行
+
+## 📝 コマンドラインオプション
+
+### 使用可能なオプション
+
+| オプション | 省略形 | 説明 | デフォルト値 |
+|---------|------|------|------------|
+| `--interval` | `-i` | 音量調整の間隔（秒） | 環境変数 `INTERVAL_SEC` または 1200 |
+
+### 使用例
+
+```bash
+# デフォルト設定で実行
+uv run python main.py
+
+# 5分間隔で音量を下げる
+uv run python main.py --interval 300
+
+# 30分間隔で音量を下げる
+uv run python main.py -i 1800
+```
 
 ## 🤝 貢献
 
