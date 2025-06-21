@@ -7,19 +7,24 @@ lower_cast_volume.py
 * Python 3.9+
 """
 
+import os
 import time
 import logging
 import sys
 from pathlib import Path
 
 import pychromecast
+from dotenv import load_dotenv
+
+# .envファイルを読み込む
+load_dotenv()
 
 # ========= 設定 =========
-CHROMECAST_NAME = "Dell"  # Google Home アプリに表示される友好的名称
-STEP = -0.04         # 1 ステップ ≒ 4 %  (25 段階想定)
-MIN_LEVEL = 0.3     # 0.0 まで行かないよう安全マージン
-INTERVAL_SEC = 60 * 20    # 60 秒 * 20 = 20 分
-DEFAULT_VOLUME = 0.5
+CHROMECAST_NAME = os.getenv("CHROMECAST_NAME", "Dell")
+STEP = float(os.getenv("STEP", "-0.04"))
+MIN_LEVEL = float(os.getenv("MIN_LEVEL", "0.3"))
+INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "1200"))
+DEFAULT_VOLUME = float(os.getenv("DEFAULT_VOLUME", "0.5"))
 # ========================
 
 
