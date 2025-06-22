@@ -10,8 +10,7 @@ def test_parse_args_default():
     assert args.interval == 1200
     assert args.name == "Dell"
     assert args.step == -0.04
-    assert args.min_level == 0.45
-    assert args.default_volume == 0.6
+    assert args.min_level == 0.3
 
 
 def test_parse_args_custom():
@@ -20,14 +19,12 @@ def test_parse_args_custom():
         "--interval", "600",
         "--name", "Living Room",
         "--step", "-0.05",
-        "--min-level", "0.2",
-        "--default-volume", "0.6"
+        "--min-level", "0.2"
     ])
     assert args.interval == 600
     assert args.name == "Living Room"
     assert args.step == -0.05
     assert args.min_level == 0.2
-    assert args.default_volume == 0.6
 
 
 def test_parse_args_short():
@@ -36,14 +33,12 @@ def test_parse_args_short():
         "-i", "300",
         "-n", "Bedroom",
         "-s", "-0.03",
-        "-m", "0.25",
-        "-d", "0.45"
+        "-m", "0.25"
     ])
     assert args.interval == 300
     assert args.name == "Bedroom"
     assert args.step == -0.03
     assert args.min_level == 0.25
-    assert args.default_volume == 0.45
 
 
 def test_parse_args_mixed():
@@ -56,5 +51,4 @@ def test_parse_args_mixed():
     assert args.interval == 900
     assert args.name == "Kitchen"
     assert args.step == -0.02
-    assert args.min_level == 0.45  # デフォルト値
-    assert args.default_volume == 0.6  # デフォルト値
+    assert args.min_level == 0.3  # デフォルト値

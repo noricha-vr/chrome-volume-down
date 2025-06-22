@@ -25,7 +25,6 @@ CHROMECAST_NAME = os.getenv("CHROMECAST_NAME", "Dell")
 STEP = float(os.getenv("STEP", "-0.04"))
 MIN_LEVEL = float(os.getenv("MIN_LEVEL", "0.3"))
 DEFAULT_INTERVAL_SEC = int(os.getenv("INTERVAL_SEC", "1200"))
-DEFAULT_VOLUME = float(os.getenv("DEFAULT_VOLUME", "0.5"))
 # ========================
 
 
@@ -57,12 +56,6 @@ def parse_args(args=None):
         default=MIN_LEVEL,
         help=f"最小音量レベル。デフォルト: {MIN_LEVEL}"
     )
-    parser.add_argument(
-        "-d", "--default-volume",
-        type=float,
-        default=DEFAULT_VOLUME,
-        help=f"リセット時のデフォルト音量。デフォルト: {DEFAULT_VOLUME}"
-    )
     return parser.parse_args(args)
 
 
@@ -73,7 +66,6 @@ def main() -> None:
     chromecast_name = args.name
     step = args.step
     min_level = args.min_level
-    default_volume = args.default_volume
     
     # logs ディレクトリにファイルとしてログを出力する設定
     log_dir = Path(__file__).resolve().parent / "logs"
@@ -93,7 +85,6 @@ def main() -> None:
     logging.info(f"Chromecast名: {chromecast_name}")
     logging.info(f"音量調整ステップ: {step}")
     logging.info(f"最小音量レベル: {min_level}")
-    logging.info(f"デフォルト音量: {default_volume}")
 
     logging.info("Chromecast デバイスを検索しています...")
     
@@ -122,6 +113,15 @@ def main() -> None:
 
     logging.info("接続完了: %s (%s)", cast.cast_info.friendly_name, cast.cast_info.host)
     cast.wait()  # ソケット接続確立を待つ
+    
+    # 起動時の音量を保存
+    cast.media_controller.update_status()
+    initial_volume = cast.status.volume_level
+    if initial_volume is None:
+        logging.warning("起動時の音量を取得できませんでした。0.5を使用します。")
+        initial_volume = 0.5
+    else:
+        logging.info("起動時の音量を保存しました: %.2f", initial_volume)
 
     try:
         while True:
@@ -137,9 +137,9 @@ def main() -> None:
             
             if cur <= min_level:
                 logging.info("最小音量に到達 (%.2f)。", cur)
-                # ボリュームを0に設定
-                cast.set_volume(default_volume)
-                logging.info("音量を%sに設定しました。", default_volume)
+                # ボリュームを初期値に戻す
+                cast.set_volume(initial_volume)
+                logging.info("音量を初期値 %.2f に戻しました。", initial_volume)
                 time.sleep(2)  # 音量設定が反映されるまで待機
                 
                 # Chromecastの電源を切る（スタンバイモードにする）
@@ -154,6 +154,15 @@ def main() -> None:
             logging.info("音量を %.2f → %.2f へ変更しました", cur, new_level)
 
             time.sleep(interval_sec)
+    except KeyboardInterrupt:
+        logging.info("\n中断されました。音量を初期値に戻します...")
+        try:
+            cast.set_volume(initial_volume)
+            logging.info("音量を初期値 %.2f に戻しました。", initial_volume)
+            time.sleep(1)  # 音量設定が反映されるまで待機
+        except Exception as e:
+            logging.error("音量の復元に失敗しました: %s", e)
+        raise
     finally:
         # Discoveryを適切に停止
         pychromecast.stop_discovery(browser)

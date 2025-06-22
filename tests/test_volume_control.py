@@ -52,7 +52,7 @@ class TestVolumeControl:
     def test_environment_variable_defaults(self):
         """環境変数のデフォルト値テスト"""
         # 環境変数をクリア
-        env_vars = ['CHROMECAST_NAME', 'STEP', 'MIN_LEVEL', 'INTERVAL_SEC', 'DEFAULT_VOLUME']
+        env_vars = ['CHROMECAST_NAME', 'STEP', 'MIN_LEVEL', 'INTERVAL_SEC']
         original_values = {}
         for var in env_vars:
             original_values[var] = os.environ.get(var)
@@ -66,14 +66,13 @@ class TestVolumeControl:
             
             from nemucast.main import (
                 CHROMECAST_NAME, STEP, MIN_LEVEL, 
-                DEFAULT_INTERVAL_SEC, DEFAULT_VOLUME
+                DEFAULT_INTERVAL_SEC
             )
             
             assert CHROMECAST_NAME == "Dell"
             assert STEP == -0.04
-            assert MIN_LEVEL == 0.45
+            assert MIN_LEVEL == 0.3
             assert DEFAULT_INTERVAL_SEC == 1200
-            assert DEFAULT_VOLUME == 0.6
         
         finally:
             # 環境変数を復元
