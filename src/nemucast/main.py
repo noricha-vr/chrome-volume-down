@@ -59,6 +59,52 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
+def is_chromecast_active(cast) -> bool:
+    """
+    Chromecastが実際にアクティブかどうかを確認する
+    
+    Returns:
+        bool: アクティブならTrue、アイドル/スタンバイ状態ならFalse
+    """
+    try:
+        # デバッグ情報を表示
+        logging.debug(f"Cast status - app_id: {cast.status.app_id}, "
+                     f"display_name: {cast.status.display_name}, "
+                     f"is_active_input: {cast.status.is_active_input}, "
+                     f"is_stand_by: {cast.status.is_stand_by}")
+        
+        # app_idがNoneの場合はアイドル状態
+        if cast.status.app_id is None:
+            logging.debug("Chromecast is idle (no app running)")
+            return False
+            
+        # IDLE_APP_IDまたはBackdropアプリの場合はアイドル状態
+        if cast.status.app_id in [pychromecast.IDLE_APP_ID, 'E8C28D3C', 'Backdrop']:
+            logging.debug(f"Chromecast is idle (app_id: {cast.status.app_id})")
+            return False
+        
+        # メディアコントローラーの状態も確認
+        try:
+            cast.media_controller.update_status()
+            if hasattr(cast.media_controller, 'status') and cast.media_controller.status:
+                player_state = cast.media_controller.status.player_state
+                logging.debug(f"Media player state: {player_state}")
+                # メディアが再生中または一時停止中の場合はアクティブ
+                if player_state in ['PLAYING', 'PAUSED', 'BUFFERING']:
+                    return True
+        except:
+            pass
+        
+        # 何かアプリが起動している（AndroidNativeApp、YouTube、Netflixなど）
+        logging.debug(f"Chromecast is active - app: {cast.status.display_name} ({cast.status.app_id})")
+        return True
+        
+    except Exception as e:
+        logging.warning(f"Chromecastの状態確認に失敗しました: {e}")
+        # エラーの場合は動作を継続するためTrueを返す
+        return True
+
+
 def main() -> None:
     # コマンドライン引数を解析
     args = parse_args()
@@ -72,8 +118,11 @@ def main() -> None:
     log_dir.mkdir(exist_ok=True)
     log_file = log_dir / "lower_cast_volume.log"
 
+    # 環境変数でログレベルを設定可能にする
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    
     logging.basicConfig(
-        level=logging.INFO,
+        level=getattr(logging, log_level, logging.INFO),
         format="[%(asctime)s] %(levelname)s: %(message)s",
         handlers=[
             logging.FileHandler(log_file, encoding="utf-8"),
@@ -125,6 +174,12 @@ def main() -> None:
 
     try:
         while True:
+            # Chromecastがアクティブかどうかチェック
+            if not is_chromecast_active(cast):
+                logging.info("Chromecastはスタンバイ状態です。音量調整をスキップします。")
+                time.sleep(interval_sec)
+                continue
+            
             # 最新のステータスを更新して取得
             cast.media_controller.update_status()
             cur = cast.status.volume_level
@@ -143,10 +198,16 @@ def main() -> None:
                 time.sleep(2)  # 音量設定が反映されるまで待機
                 
                 # Chromecastの電源を切る（スタンバイモードにする）
-                logging.info("Chromecastをスタンバイモードにします。")
-                cast.quit_app()
-                time.sleep(2)  # 処理が完了するまで待機
-                logging.info("Chromecastがスタンバイモードになりました。プログラムを終了します。")
+                # 既にスタンバイ状態でないかチェック
+                if is_chromecast_active(cast):
+                    logging.info("Chromecastをスタンバイモードにします。")
+                    cast.quit_app()
+                    time.sleep(2)  # 処理が完了するまで待機
+                    logging.info("Chromecastがスタンバイモードになりました。")
+                else:
+                    logging.info("Chromecastは既にスタンバイ状態です。")
+                
+                logging.info("プログラムを終了します。")
                 break
 
             new_level = max(min_level-1, round(cur + step, 2))
