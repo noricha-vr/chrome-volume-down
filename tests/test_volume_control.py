@@ -13,27 +13,27 @@ class TestVolumeControl:
         """音量を段階的に下げる計算のテスト"""
         current = 0.5
         step = -0.04
-        min_level = 0.3
+        min_level = 0.4
         
         # 正常な音量下げ計算
         expected = max(min_level - 1, round(current + step, 2))
         assert expected == 0.46
         
         # 最小値に近い場合
-        current = 0.32
+        current = 0.42
         expected = max(min_level - 1, round(current + step, 2))
-        assert expected == 0.28
+        assert expected == 0.38
 
     def test_min_volume_detection(self):
         """最小音量の検出テスト"""
-        min_level = 0.3
+        min_level = 0.4
         
         # 最小値以下
-        assert 0.29 <= min_level
-        assert 0.3 <= min_level
+        assert 0.39 <= min_level
+        assert 0.4 <= min_level
         
         # 最小値より大きい
-        assert not (0.31 <= min_level)
+        assert not (0.41 <= min_level)
         assert not (0.5 <= min_level)
 
     @patch('pychromecast.get_chromecasts')
@@ -71,7 +71,7 @@ class TestVolumeControl:
             
             assert CHROMECAST_NAME == "Dell"
             assert STEP == -0.04
-            assert MIN_LEVEL == 0.3
+            assert MIN_LEVEL == 0.4
             assert DEFAULT_INTERVAL_SEC == 1200
         
         finally:

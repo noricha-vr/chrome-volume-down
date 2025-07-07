@@ -10,7 +10,7 @@ def test_parse_args_default():
     assert args.interval == 1200
     assert args.name == "Dell"
     assert args.step == -0.04
-    assert args.min_level == 0.3
+    assert args.min_level == 0.4
 
 
 def test_parse_args_custom():
@@ -51,4 +51,4 @@ def test_parse_args_mixed():
     assert args.interval == 900
     assert args.name == "Kitchen"
     assert args.step == -0.02
-    assert args.min_level == 0.3  # デフォルト値
+    assert args.min_level == 0.4  # デフォルト値
