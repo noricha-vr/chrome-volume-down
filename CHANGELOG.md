@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Refactored
+- main.pyを役割ごとに関数化してリファクタリング
+  - setup_logging: ロギング設定
+  - discover_chromecasts: デバイス検索
+  - log_chromecast_status/log_active_app_status: 状態表示
+  - get_initial_volume/adjust_volume/restore_volume_and_standby: 音量制御
+  - volume_control_loop: メインループ
+- 関数のドキュメントをdocs/functions.mdに追加
+- リファクタリングされた関数の単体テストを追加（test_refactored_functions.py）
+
+### Changed
+- INFOログレベルでChromecastの状態情報を出力するように改善
+  - 接続時にChromecastの状態（アクティブ/アイドル）を表示
+  - メディアの再生状態（PLAYING/PAUSED等）を表示
+- アプリ名の取得処理を削除（安定した取得が困難なため）
+
 ### Added
 - Chromecastの起動状態チェック機能を追加
   - `is_chromecast_active()` メソッドを実装し、デバイスが実際にアクティブかどうかを確認
